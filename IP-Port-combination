@@ -1,0 +1,55 @@
+Sub CombinePorts()
+    Dim ws As Worksheet
+    Dim lastRow As Long
+    Dim ipDict As Object
+    Dim i As Long
+    Dim ip As String
+    Dim port As String
+    Dim combinedPorts As String
+    
+    ' Set the worksheet to the active sheet
+    Set ws = ThisWorkbook.Sheets(1) ' Change the sheet number as needed
+    
+    ' Find the last row in column C
+    lastRow = ws.Cells(ws.Rows.Count, "C").End(xlUp).Row
+    
+    ' Create a dictionary to store the IP and combined ports
+    Set ipDict = CreateObject("Scripting.Dictionary")
+    
+    ' Loop through each IP and port in columns C and D
+    For i = 2 To lastRow
+        ip = ws.Cells(i, 3).Value
+        port = ws.Cells(i, 4).Value
+        
+        ' Check if the IP already exists in the dictionary
+        If ipDict.exists(ip) Then
+            ' Append the port to the existing ports
+            ipDict(ip) = ipDict(ip) & "," & port
+        Else
+            ' Add the IP and port to the dictionary
+            ipDict.Add ip, port
+        End If
+    Next i
+    
+    ' Clear the original data
+    ws.Range("E2:F" & lastRow).ClearContents
+    
+    ' Output the combined IP and ports to columns E and F
+    i = 2
+    For Each ip In ipDict.keys
+        ws.Cells(i, 5).Value = ip
+        ws.Cells(i, 6).Value = ipDict(ip)
+        i = i + 1
+    Next ip
+    
+    ' Set headers for the new columns
+    ws.Cells(1, 5).Value = "IP"
+    ws.Cells(1, 6).Value = "Combined Ports"
+    
+    ' Autofit the columns
+    ws.Columns("E:F").AutoFit
+    
+    ' Cleanup
+    Set ipDict = Nothing
+    MsgBox "Ports combined successfully!", vbInformation
+End Sub
